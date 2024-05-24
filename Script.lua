@@ -1,4 +1,3 @@
-
 -- Load Orion Library
 local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Orion/main/source"))()
 
@@ -111,6 +110,45 @@ TeleportSection:AddButton({
         while true do
             collectCoins()
             wait(1)
+        end
+    end
+})
+
+-- Player Kill Tab
+local KillTab = Window:MakeTab({
+    Name = "Kill Players",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+local KillSection = KillTab:AddSection({
+    Name = "Kill Players"
+})
+
+KillSection:AddButton({
+    Name = "Kill All Players",
+    Callback = function()
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player.Character and player.Character:FindFirstChild("Humanoid") then
+                player.Character.Humanoid.Health = 0
+            end
+        end
+    end
+})
+
+KillSection:AddButton({
+    Name = "Drag Player",
+    Callback = function()
+        repeat wait() until game.Players.LocalPlayer
+        local player = game.Players.LocalPlayer
+        local targetPlayer = game.Players:FindFirstChild("TargetPlayerName") -- Replace with actual target player name or logic to find player
+
+        if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            local dragDetector = Instance.new("DragDetector")
+            dragDetector.Parent = targetPlayer.Character.HumanoidRootPart
+            dragDetector.DragStart:Connect(function()
+                player.Character.HumanoidRootPart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame
+            end)
         end
     end
 })
