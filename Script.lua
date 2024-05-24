@@ -1,157 +1,85 @@
--- Load Orion Library
-local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Orion/main/source"))()
+-- تحميل مكتبة KR4K
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/stysscythe/script/main/LibTest.lua"))()
 
--- Create Window
-local Window = OrionLib:MakeWindow({Name = "Sky Wars by Abo_3le", HidePremium = false, SaveConfig = true, ConfigFolder = "SkyWarsConfig"})
+-- إنشاء نافذة
+local Window = Library.Window('Sky Wars by Abo_3le')
 
--- Home Tab
-local HomeTab = Window:MakeTab({
-    Name = "Home",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
+-- إنشاء التبويبات
+local HomeTab = Window.CreateTab('Home')
+local TeleportTab = Window.CreateTab('Teleport')
+local KillTab = Window.CreateTab('Kill Players')
+local AutoTab = Window.CreateTab('Auto Clicking')
 
--- Hitbox Section
-local HitboxSection = HomeTab:AddSection({
-    Name = "Hitbox"
-})
+-- تبويب Home
+HomeTab.CreateSlider("Hitbox Size", 10, 100, function(value)
+    -- منطق تغيير حجم Hitbox
+    print("Hitbox Size: " .. value)
+end)
 
-local hitboxSize = Vector3.new(20, 20, 20)
-
-HitboxSection:AddSlider({
-    Name = "Hitbox Size",
-    Min = 10,
-    Max = 100,
-    Default = 20,
-    Color = Color3.fromRGB(255,255,255),
-    Increment = 1,
-    ValueName = "Size",
-    Callback = function(value)
-        hitboxSize = Vector3.new(value, value, value)
-    end
-})
-
-HitboxSection:AddButton({
-    Name = "Apply Hitbox Size",
-    Callback = function()
-        repeat wait() until game.Players.LocalPlayer
+HomeTab.CreateButton("Apply Hitbox Size", function()
+    -- منطق تطبيق حجم Hitbox
+    local hitboxSize = Vector3.new(20, 20, 20) -- يمكن تعديل القيمة هنا
+    game:GetService("RunService").RenderStepped:Connect(function()
         local player = game.Players.LocalPlayer
-        if player then
-            game:GetService("RunService").RenderStepped:Connect(function()
-                for _, enemy in pairs(game.Players:GetPlayers()) do
-                    if enemy ~= player and not player:IsFriendsWith(enemy.UserId) and enemy.Character and enemy.Character:FindFirstChild("HumanoidRootPart") then
-                        local hrp = enemy.Character.HumanoidRootPart
-                        hrp.Size = hitboxSize
-                        hrp.Transparency = 0.5
-                        hrp.CanCollide = false
-                    end
-                end
-            end)
+        for _, enemy in pairs(game.Players:GetPlayers()) do
+            if enemy ~= player and not player:IsFriendsWith(enemy.UserId) and enemy.Character and enemy.Character:FindFirstChild("HumanoidRootPart") then
+                local hrp = enemy.Character.HumanoidRootPart
+                hrp.Size = hitboxSize
+                hrp.Transparency = 0.5
+                hrp.CanCollide = false
+            end
         end
+    end)
+end)
+
+-- تبويب Teleport
+TeleportTab.CreateButton("VIP Mega", function()
+    local player = game.Players.LocalPlayer
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        local targetPosition = Vector3.new(0.6567292809486389, 175.9999542236328, 64.98756408691406)
+        player.Character.HumanoidRootPart.CFrame = CFrame.new(targetPosition)
     end
-})
+end)
 
--- Teleport Tab
-local TeleportTab = Window:MakeTab({
-    Name = "Teleport",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
-
-local TeleportSection = TeleportTab:AddSection({
-    Name = "Teleport Locations"
-})
-
-TeleportSection:AddButton({
-    Name = "VIP Mega",
-    Callback = function()
-        repeat wait() until game.Players.LocalPlayer
-        local player = game.Players.LocalPlayer
-        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local targetPosition = Vector3.new(0.6567292809486389, 175.9999542236328, 64.98756408691406)
-            player.Character.HumanoidRootPart.CFrame = CFrame.new(targetPosition)
-        end
-    end
-})
-
-TeleportSection:AddButton({
-    Name = "VIP",
-    Callback = function()
-        repeat wait() until game.Players.LocalPlayer
-        local player = game.Players.LocalPlayer
+TeleportTab.CreateButton("VIP", function()
+    local player = game.Players.LocalPlayer
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
         local targetPosition = Vector3.new(1.592913269996643, 175.9999542236328, -66.3504409790039)
-        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            player.Character.HumanoidRootPart.CFrame = CFrame.new(targetPosition)
-        end
+        player.Character.HumanoidRootPart.CFrame = CFrame.new(targetPosition)
     end
-})
+end)
 
-TeleportSection:AddButton({
-    Name = "Autofarm",
-    Callback = function()
-        repeat wait() until game.Players.LocalPlayer
-        local player = game.Players.LocalPlayer
-        local function findCoins()
-            local coins = {}
-            for _, part in ipairs(workspace:GetDescendants()) do
-                if part:IsA("MeshPart") and part.Name == "Coin" then
-                    table.insert(coins, part)
+-- تبويب Kill Players
+KillTab.CreateButton("Kill all!", function()
+    local player = game.Players.LocalPlayer
+    local function findSwordHolder()
+        for _, v in pairs(game:GetService("Players"):GetPlayers()) do
+            if v ~= nil and v ~= player and v.Character ~= nil then
+                if v.Character:FindFirstChild("Sword") or v.Backpack:FindFirstChild("Sword") then
+                    return v
                 end
             end
-            return coins
         end
-        local function collectCoins()
-            local coins = findCoins()
-            for _, coin in ipairs(coins) do
-                player.Character.Humanoid:MoveTo(coin.Position)
-                wait(0.5)
-            end
-        end
-        while true do
-            collectCoins()
-            wait(1)
-        end
+        return nil
     end
-})
-
--- Player Kill Tab
-local KillTab = Window:MakeTab({
-    Name = "Kill Players",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
-
-local KillSection = KillTab:AddSection({
-    Name = "Kill Players"
-})
-
-KillSection:AddButton({
-    Name = "Kill All Players",
-    Callback = function()
-        for _, player in pairs(game.Players:GetPlayers()) do
-            if player.Character and player.Character:FindFirstChild("Humanoid") then
-                player.Character.Humanoid.Health = 0
-            end
+    while true do
+        local targetPlayer = findSwordHolder()
+        while targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("Humanoid") and targetPlayer.Character.Humanoid.Health > 0 do
+            player.Character:SetPrimaryPartCFrame(targetPlayer.Character:GetPrimaryPartCFrame())
+            wait(0.1) -- تكرار التحقق بسرعة
         end
+        wait(0.1) -- الانتظار قليلاً قبل البحث عن لاعب آخر
     end
-})
+end)
 
-KillSection:AddButton({
-    Name = "Drag Player",
-    Callback = function()
-        repeat wait() until game.Players.LocalPlayer
-        local player = game.Players.LocalPlayer
-        local targetPlayer = game.Players:FindFirstChild("TargetPlayerName") -- Replace with actual target player name or logic to find player
-
-        if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            local dragDetector = Instance.new("DragDetector")
-            dragDetector.Parent = targetPlayer.Character.HumanoidRootPart
-            dragDetector.DragStart:Connect(function()
-                player.Character.HumanoidRootPart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame
-            end)
+-- تبويب Auto Clicking
+AutoTab.CreateButton("Auto Clicking !", function()
+    -- منطق Auto Clicking
+    local player = game.Players.LocalPlayer
+    game:GetService("RunService").RenderStepped:Connect(function()
+        local tool = player.Character and player.Character:FindFirstChildOfClass("Tool")
+        if tool and tool:FindFirstChild("Handle") then
+            tool:Activate()
         end
-    end
-})
-
--- Initialize Orion Library
-OrionLib:Init()
+    end)
+end)
